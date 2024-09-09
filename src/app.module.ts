@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostgresConfig } from './config/postgres.config';
+import { RolesModule } from './modules/roles/roles.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -17,6 +19,9 @@ import { PostgresConfig } from './config/postgres.config';
       imports: [ConfigModule],
       useClass: PostgresConfig,
     }),
+
+    RolesModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
