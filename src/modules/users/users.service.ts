@@ -11,16 +11,16 @@ import * as consts from './../../common/constants/error.constants';
 import { CreateUserInput } from './dto/create-user.input.dto';
 import { UpdateUserInput } from './dto/update-user.input.dto';
 import { UserDTO } from './dto/user.dto';
-import { Users } from './entities/user.entity';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(Users)
-    public userRepository: Repository<Users>,
+    @InjectRepository(User)
+    public userRepository: Repository<User>,
   ) {}
 
-  async findOne(input: BaseInputWhere & FindOneOptions<Users>): Promise<Users> {
+  async findOne(input: BaseInputWhere & FindOneOptions<User>): Promise<User> {
     const data = await this.userRepository.findOne({ ...input });
     if (!data) {
       throw new NotFoundException(consts.USER_NOT_FOUND);
@@ -64,7 +64,7 @@ export class UsersService {
     if (foundUser) {
       throw new UnauthorizedException(consts.USER_EXIST);
     }
-    const user: Users = this.userRepository.create({
+    const user: User = this.userRepository.create({
       ...data,
       // roles: data.roles,
     });
@@ -86,14 +86,14 @@ export class UsersService {
   }
 
   async updateUser(id: string, data: UpdateUserInput): Promise<UserDTO> {
-    const foundUser: Users = await this.userRepository.findOne({
+    const foundUser: User = await this.userRepository.findOne({
       where: { id },
     });
     if (!foundUser) {
       throw new NotFoundException(consts.USER_NOT_FOUND);
     }
 
-    const buildUser: Users = this.userRepository.create(data);
+    const buildUser: User = this.userRepository.create(data);
 
     const userSaved = await this.userRepository.save({
       ...foundUser,
@@ -119,8 +119,8 @@ export class UsersService {
     return false;
   }
 
-  async updateLastLogin(id: string): Promise<Users> {
-    const foundUser: Users = await this.userRepository.findOne({
+  async updateLastLogin(id: string): Promise<User> {
+    const foundUser: User = await this.userRepository.findOne({
       where: { id },
     });
 

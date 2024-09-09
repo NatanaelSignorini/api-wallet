@@ -16,7 +16,7 @@ import {
 import { CreateUserInput } from './dto/create-user.input.dto';
 import { UpdateUserInput } from './dto/update-user.input.dto';
 import { UserDTO } from './dto/user.dto';
-import { Users } from './entities/user.entity';
+import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
 @ApiBearerAuth()
@@ -32,7 +32,7 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'The found record',
-    type: Users,
+    type: User,
   })
   async getUsersAll(): Promise<UserDTO[]> {
     return this.usersService.findAllUsers();
@@ -45,7 +45,7 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'The found record',
-    type: Users,
+    type: User,
   })
   async getUserById(@Param('id') id: string): Promise<UserDTO> {
     return this.usersService.getUserById(id);

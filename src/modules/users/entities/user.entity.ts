@@ -1,9 +1,17 @@
 import { passwordEncoder } from 'src/common/decorators/encodePassword.decorator';
 import { BaseEntity } from 'src/modules/bases/entities/base.entity';
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { Role } from 'src/modules/roles/entities/role.entity';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+} from 'typeorm';
 
 @Entity()
-export class Users extends BaseEntity {
+export class User extends BaseEntity {
   @Column({ name: 'full_name', type: 'varchar', length: 60, nullable: true })
   fullName?: string;
 
@@ -29,13 +37,9 @@ export class Users extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   lastLogin?: Date;
 
-  // @Column({
-  //   name: 'roles',
-  //   type: 'enum',
-  //   enum: RolesEnum,
-  //   nullable: false,
-  // })
-  // roles: RolesEnum;
+  @ManyToMany(() => Role, (role) => role.users, { eager: true })
+  @JoinTable()
+  roles?: Role[];
 
   @BeforeInsert()
   emailToLowerCase(): void {
