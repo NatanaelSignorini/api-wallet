@@ -18,6 +18,10 @@ import { UsersModule } from './modules/users/users.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useClass: PostgresConfig,
+      // dataSourceFactory: async (options) => {
+      //   const dataSource = await new DataSource(options).initialize();
+      //   return dataSource;
+      // },
     }),
 
     RolesModule,

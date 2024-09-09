@@ -10,15 +10,15 @@ export class BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id?: string;
 
-  @CreateDateColumn({ name: 'created_at', type: 'date' })
+  @CreateDateColumn({ name: 'created_at' })
   @Expose({ name: 'created_at' })
   createdAt?: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'date' })
+  @UpdateDateColumn({ name: 'updated_at' })
   @Expose({ name: 'updated_at' })
   updatedAt?: Date;
 
-  @DeleteDateColumn({ name: 'deleted_at', type: 'date' })
+  @DeleteDateColumn({ name: 'deleted_at' })
   @Expose({ name: 'deleted_at' })
   deletedAt?: Date;
 }

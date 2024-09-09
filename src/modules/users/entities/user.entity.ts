@@ -20,7 +20,7 @@ export class User extends BaseEntity {
     unique: true,
     type: 'varchar',
     length: 20,
-    nullable: false,
+    nullable: true,
   })
   cpfCnpj?: string;
 
@@ -47,14 +47,14 @@ export class User extends BaseEntity {
   }
 
   @BeforeInsert()
-  async hashPassword(): Promise<void> {
+  private async hashPassword(): Promise<void> {
     if (this.password) {
       this.password = await passwordEncoder.hash(this.password);
     }
   }
 
   @BeforeUpdate()
-  async updatePassword(): Promise<void> {
+  private async updatePassword(): Promise<void> {
     if (this.password) {
       this.password = await passwordEncoder.hash(this.password);
     }
