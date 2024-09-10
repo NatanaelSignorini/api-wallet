@@ -1,6 +1,6 @@
 services:
   api:
-    container_name: api_teste_backend
+    container_name: api_wallet
     build:
       context: .
       target: development
@@ -17,7 +17,7 @@ services:
       - postgres
 
   postgres:
-    container_name: api_teste_backend_postgres
+    container_name: api_wallet_postgres
     image: postgres:13-alpine
     networks:
       - backend
