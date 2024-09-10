@@ -1,11 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compareSync } from 'bcryptjs';
+import { plainToClass } from 'class-transformer';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import * as consts from './../../common/constants/error.constants';
-import { AuthInput } from './dto/auth.input';
-import { AuthType, TokenValidType } from './dto/auth.type';
+import { AuthDTO, TokenValidType } from './dto/auth.dto';
+import { AuthInput } from './dto/auth.input.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,9 +15,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(data: AuthInput): Promise<AuthType> {
-    const user: User = await this.userService.findOne({
+  async validateUser(data: AuthInput): Promise<AuthDTO> {
+    const user: User = await this.userService.findOneUser({
       where: [{ email: data.email }],
+      relations: ['role'],
     });
 
     if (!user) {
@@ -36,10 +38,7 @@ export class AuthService {
     const token = await this.jwtToken(user);
     this.userService.updateLastLogin(user.id);
 
-    return {
-      user,
-      token,
-    };
+    return plainToClass(AuthDTO, { user, token });
   }
 
   private async jwtToken(user: User): Promise<string> {
@@ -54,7 +53,7 @@ export class AuthService {
     try {
       jwtService.verify(token);
       const tokenContent = jwtService.decode(token);
-      const user: User = await this.userService.findOne({
+      const user: User = await this.userService.findOneUser({
         where: { id: tokenContent.sub },
       });
       if (user) {

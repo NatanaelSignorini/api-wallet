@@ -8,7 +8,7 @@ import * as consts from './../../../common/constants/error.constants';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly userService: UsersService) {
+  constructor(private readonly usersService: UsersService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -25,12 +25,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return user;
   }
 
-  private async getUser(id: string) {
-    const user = await this.userService.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.roles', 'role')
-      .where('user.id = :id', { id })
-      .getOne();
+  private async getUser(id: string): Promise<User | null> {
+    console.log('id', id);
+    const user = await this.usersService.findOneUser(id);
+
+    console.log('user', user);
+
+    if (!user) {
+      return null;
+    }
 
     return user;
   }
