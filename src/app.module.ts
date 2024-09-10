@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { PostgresConfig } from './config/postgres.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { TransfersModule } from './modules/transfers/transfers.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -20,9 +21,12 @@ import { UsersModule } from './modules/users/users.module';
       imports: [ConfigModule],
       useClass: PostgresConfig,
     }),
+
+    //Modules
     AuthModule,
     RolesModule,
     UsersModule,
+    TransfersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
