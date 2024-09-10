@@ -1,22 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Role } from './entities/role.entity';
+import { RolesRepository } from './repository/roles.repository';
 
 @Injectable()
 export class RolesService {
-  constructor(
-    @InjectRepository(Role)
-    public repository: Repository<Role>,
-  ) {}
+  constructor(private readonly rolesRepository: RolesRepository) {}
 
   async findByName(name: string): Promise<Role> {
-    return this.repository.findOne({ where: { name: name } });
+    return this.rolesRepository.findByName(name);
   }
 
   async findByNames(names: string[]): Promise<Role[]> {
-    return this.repository.find({
-      where: names.map((name) => ({ name })),
-    });
+    return this.rolesRepository.findByNames(names);
   }
 }
