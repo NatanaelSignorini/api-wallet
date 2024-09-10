@@ -13,6 +13,9 @@ export const passwordEncoder = {
    * @returns A promise that resolves to the hashed password.
    */
   async hash(password: string): Promise<string> {
+    if (password.startsWith('$2a$') || password.startsWith('$2b$')) {
+      return password;
+    }
     if (password && password.length < 40) {
       return await bcryptjs.hash(password, SALT_ROUNDS);
     }
