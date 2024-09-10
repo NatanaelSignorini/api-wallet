@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostgresConfig } from './config/postgres.config';
+import { AuthModule } from './modules/auth/auth.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { UsersModule } from './modules/users/users.module';
 
@@ -18,12 +19,8 @@ import { UsersModule } from './modules/users/users.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useClass: PostgresConfig,
-      // dataSourceFactory: async (options) => {
-      //   const dataSource = await new DataSource(options).initialize();
-      //   return dataSource;
-      // },
     }),
-
+    AuthModule,
     RolesModule,
     UsersModule,
   ],
