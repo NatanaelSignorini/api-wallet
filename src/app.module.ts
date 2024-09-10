@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostgresConfig } from './config/postgres.config';
 import { AuthModule } from './modules/auth/auth.module';
+import { EventSourcingModule } from './modules/event-sourcing/event-sourcing.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { TransfersModule } from './modules/transfers/transfers.module';
 import { UsersModule } from './modules/users/users.module';
@@ -23,12 +24,12 @@ import { WalletsModule } from './modules/wallets/wallets.module';
       useClass: PostgresConfig,
     }),
 
-    //Modules
     AuthModule,
     RolesModule,
     UsersModule,
     TransfersModule,
     WalletsModule,
+    EventSourcingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
