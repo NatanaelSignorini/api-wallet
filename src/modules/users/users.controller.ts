@@ -60,8 +60,8 @@ export class UsersController {
   @Post()
   @ApiOperation({ summary: 'Create User' })
   @ApiResponse({
-    status: 403,
-    description: 'Forbidden.',
+    status: 201,
+    description: 'Create User',
     type: UserDTO,
   })
   async createUser(@Body() data: CreateUserInput): Promise<UserDTO> {
@@ -73,8 +73,8 @@ export class UsersController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update User' })
   @ApiResponse({
-    status: 403,
-    description: 'Forbidden.',
+    status: 201,
+    description: 'Update User',
     type: UserDTO,
   })
   async updateUser(
@@ -89,8 +89,8 @@ export class UsersController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete User' })
   @ApiResponse({
-    status: 403,
-    description: 'Forbidden.',
+    status: 201,
+    description: 'Delete User',
     type: 'boolean',
   })
   async deleteUser(@Param('id') id: string): Promise<boolean> {
