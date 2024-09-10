@@ -1,6 +1,6 @@
 import { BaseEntity } from 'src/modules/bases/entities/base.entity';
 import { User } from 'src/modules/users/entities/user.entity';
-import { Column, Entity, ManyToMany } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { RolesEnum } from '../enum/role.enum';
 
 @Entity()
@@ -13,6 +13,6 @@ export class Role extends BaseEntity {
   })
   name: string;
 
-  @ManyToMany(() => User, (user) => user.roles)
-  users?: User[];
+  @OneToMany(() => User, (user) => user.role)
+  users: User[];
 }

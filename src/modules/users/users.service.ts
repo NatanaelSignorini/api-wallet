@@ -5,10 +5,13 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToClass } from 'class-transformer';
 import { FindOneOptions, Repository } from 'typeorm';
 import { BaseInputWhere } from '../bases/dto/base.input';
+import { Role } from '../roles/entities/role.entity';
 import * as consts from './../../common/constants/error.constants';
 import { CreateUserInput } from './dto/create-user.input.dto';
+import { CustomUsersDTO } from './dto/custom-users-dto';
 import { UpdateUserInput } from './dto/update-user.input.dto';
 import { UserDTO } from './dto/user.dto';
 import { User } from './entities/user.entity';
@@ -18,71 +21,69 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     public userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
   ) {}
 
   async findOne(input: BaseInputWhere & FindOneOptions<User>): Promise<User> {
-    const data = await this.userRepository.findOne({ ...input });
-    if (!data) {
+    const userData = await this.userRepository.findOne({ ...input });
+    if (!userData) {
       throw new NotFoundException(consts.USER_NOT_FOUND);
     }
-    return data;
+    return userData;
   }
 
-  async findAllUsers(): Promise<UserDTO[]> {
-    const userData: UserDTO[] = await this.userRepository.find();
+  async findAllUsers(): Promise<CustomUsersDTO> {
+    const userData: UserDTO[] = await this.userRepository.find({
+      relations: ['role'],
+    });
 
-    const userDTO: UserDTO[] = userData.map((user) => ({
-      id: user.id,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      deletedAt: user.deletedAt,
-      email: user.email,
-      lastLogin: user.lastLogin,
-    }));
-    return userDTO;
+    const totalCount = await this.userRepository.count();
+
+    return plainToClass(CustomUsersDTO, { nodes: userData, totalCount });
   }
 
   async getUserById(id: string): Promise<UserDTO> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
+    const userData = await this.userRepository.findOne({
+      where: { id },
+      relations: ['role'],
+    });
+
+    if (!userData) {
       throw new NotFoundException(consts.USER_NOT_FOUND);
     }
-    return {
-      id: user.id,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      deletedAt: user.deletedAt,
-      email: user.email,
-      lastLogin: user.lastLogin,
-    };
+
+    return plainToClass(UserDTO, userData);
   }
 
   async createUser(data: CreateUserInput): Promise<UserDTO> {
     const foundUser = await this.userRepository.findOne({
-      where: [{ email: data.email }],
+      where: [{ email: data.email, cpfCnpj: data.cpfCnpj }],
     });
     if (foundUser) {
       throw new UnauthorizedException(consts.USER_EXIST);
     }
+
+    const role = await this.roleRepository.findOne({
+      where: { name: data.role },
+    });
+
+    if (!role) {
+      throw new NotFoundException(consts.ROLE_NOT_FOUND);
+    }
+
     const user: User = this.userRepository.create({
       ...data,
-      // roles: data.roles,
+      role,
     });
+
     const userSaved = await this.userRepository.save(user);
     if (!userSaved) {
       throw new InternalServerErrorException(
         'Problem to create a User. Try again',
       );
     }
-
-    return {
-      id: userSaved.id,
-      createdAt: userSaved.createdAt,
-      updatedAt: userSaved.updatedAt,
-      deletedAt: userSaved.deletedAt,
-      email: userSaved.email,
-      lastLogin: userSaved.lastLogin,
-    };
+    return plainToClass(UserDTO, userSaved);
   }
 
   async updateUser(id: string, data: UpdateUserInput): Promise<UserDTO> {
@@ -93,21 +94,31 @@ export class UsersService {
       throw new NotFoundException(consts.USER_NOT_FOUND);
     }
 
-    const buildUser: User = this.userRepository.create(data);
+    const role = await this.roleRepository.findOne({
+      where: { name: data.role },
+    });
+
+    if (!role) {
+      throw new NotFoundException(consts.ROLE_NOT_FOUND);
+    }
+
+    const buildUser: User = this.userRepository.create({
+      ...data,
+      role: role,
+    });
 
     const userSaved = await this.userRepository.save({
       ...foundUser,
       ...buildUser,
     });
 
-    return {
-      id: userSaved.id,
-      createdAt: userSaved.createdAt,
-      updatedAt: userSaved.updatedAt,
-      deletedAt: userSaved.deletedAt,
-      email: userSaved.email,
-      lastLogin: userSaved.lastLogin,
-    };
+    if (!userSaved) {
+      throw new InternalServerErrorException(
+        'Problem to update a User. Try again',
+      );
+    }
+
+    return plainToClass(UserDTO, userSaved);
   }
 
   async deleteUser(id: string): Promise<boolean> {

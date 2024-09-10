@@ -7,7 +7,7 @@ import {
   Column,
   Entity,
   JoinTable,
-  ManyToMany,
+  ManyToOne,
 } from 'typeorm';
 
 @Entity()
@@ -37,9 +37,11 @@ export class User extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   lastLogin?: Date;
 
-  @ManyToMany(() => Role, (role) => role.users, { eager: true })
+  @ManyToOne(() => Role, (role) => role.users, { nullable: false })
   @JoinTable()
-  roles?: Role[];
+  role: Role;
+  @Column()
+  roleId: string;
 
   @BeforeInsert()
   emailToLowerCase(): void {

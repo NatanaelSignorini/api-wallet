@@ -3,27 +3,42 @@ import { RolesEnum } from 'src/modules/roles/enum/role.enum';
 import { User } from 'src/modules/users/entities/user.entity';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-const users = [{ name: 'Admin' }];
+const users = [{ name: 'Admin', email: 'admin@email.com', password: 'admin' }];
 
 export class SeedUsers1725919707672 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
+    const UserRepo = queryRunner.connection.getRepository(User);
+    const RoleRepo = queryRunner.connection.getRepository(Role);
+
+    const adminRole = await RoleRepo.findOne({
+      where: { name: RolesEnum.ADMIN },
+    });
+
+    if (!adminRole) {
+      throw new Error('Admin role not found');
+    }
+
     await Promise.all(
       users.map(async (user) => {
-        const UserRepo = queryRunner.connection.getRepository(User);
-        const admin = UserRepo.create({
-          fullName: user.name,
-          email: `${user.name.toLowerCase().replace(' ', '.')}@email.com`,
-          password: user.name.toLowerCase().replace(' ', '.'),
+        const existingUser = await UserRepo.findOne({
+          where: { email: user.email },
         });
-        const RoleRepo = queryRunner.connection.getRepository(Role);
-        admin.roles = await RoleRepo.find({ where: { name: RolesEnum.ADMIN } });
-        await UserRepo.save(admin);
+
+        if (!existingUser) {
+          const newUser = UserRepo.create({
+            fullName: user.name,
+            email: user.email,
+            password: user.password,
+            role: adminRole,
+          });
+          await UserRepo.save(newUser);
+        }
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     const UserRepo = queryRunner.connection.getRepository(User);
-    await UserRepo.delete({ email: 'admin@brainny.cc' });
+    await UserRepo.delete({ email: 'admin@email.com' });
   }
 }

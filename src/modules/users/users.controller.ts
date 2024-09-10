@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -13,10 +14,13 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/auth.roles.decorator';
+import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
+import { RolesEnum } from '../roles/enum/role.enum';
 import { CreateUserInput } from './dto/create-user.input.dto';
+import { CustomUsersDTO } from './dto/custom-users-dto';
 import { UpdateUserInput } from './dto/update-user.input.dto';
 import { UserDTO } from './dto/user.dto';
-import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
 @ApiBearerAuth()
@@ -25,46 +29,54 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @Roles('ADMIN')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(RolesEnum.ADMIN)
+  @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOperation({ summary: 'Get Users All' })
   @ApiResponse({
     status: 200,
     description: 'The found record',
-    type: User,
+    type: CustomUsersDTO,
   })
-  async getUsersAll(): Promise<UserDTO[]> {
-    return this.usersService.findAllUsers();
+  async getUsersAll(): Promise<CustomUsersDTO> {
+    return await this.usersService.findAllUsers();
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(RolesEnum.ADMIN)
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiOperation({ summary: 'Get User for id' })
   @ApiResponse({
     status: 200,
     description: 'The found record',
-    type: User,
+    type: UserDTO,
   })
   async getUserById(@Param('id') id: string): Promise<UserDTO> {
     return this.usersService.getUserById(id);
   }
 
-  // @Roles('ANY')
-  // @UseGuards(JwtAuthGuard)
+  @Roles('ANY')
+  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: 'Create User' })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden.',
+    type: UserDTO,
+  })
   async createUser(@Body() data: CreateUserInput): Promise<UserDTO> {
     return this.usersService.createUser(data);
   }
 
-  // @Roles('ADMIN', 'USER')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Update User' })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden.',
+    type: UserDTO,
+  })
   async updateUser(
     @Param('id') id: string,
     @Body() data: UpdateUserInput,
@@ -72,11 +84,15 @@ export class UsersController {
     return this.usersService.updateUser(id, data);
   }
 
-  // @Roles('ADMIN', 'USER')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete User' })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden.',
+    type: 'boolean',
+  })
   async deleteUser(@Param('id') id: string): Promise<boolean> {
     const deleted = await this.usersService.deleteUser(id);
     return deleted;

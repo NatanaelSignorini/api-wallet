@@ -17,7 +17,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('Teste Back-End')
+    .setTitle('Api')
     .setDescription('The Teste Back-End API description')
     .setVersion('1.0')
     .addTag('Back-End')
