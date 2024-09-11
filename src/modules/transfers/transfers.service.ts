@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+import { RolesEnum } from '../roles/enum/role.enum';
+import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { WalletsService } from '../wallets/wallets.service';
 import * as consts from './../../common/constants/error.constants';
@@ -17,12 +19,12 @@ export class TransfersService {
   ) {}
 
   async createNewTransfer(
-    payerId: string,
+    user: User,
     payeeId: string,
     amount: number,
   ): Promise<void> {
     const payer = await this.usersService.findOneUser({
-      where: [{ id: payerId }],
+      where: [{ id: user.id }],
     });
 
     if (!payer) {
@@ -37,21 +39,16 @@ export class TransfersService {
       throw new BadRequestException(consts.PAYEE_NOT_FOUND);
     }
 
-    const payerWallet = await this.walletsService.findWalletByUserId(payerId);
-    if (payerWallet.balance < amount) {
-      throw new BadRequestException(consts.BALANCE_INSUFFICIENT);
+    if (payer.role.name === RolesEnum.USER) {
+      const payerWallet = await this.walletsService.findWalletByUserId(
+        payer.id,
+      );
+      if (payerWallet.balance < amount) {
+        throw new BadRequestException(consts.BALANCE_INSUFFICIENT);
+      }
     }
 
-    // const authorized = await this.authorizationService.authorize(
-    //   payerId,
-    //   payeeId,
-    //   amount,
-    // );
-    // if (!authorized) {
-    //   throw new ForbiddenException('Transfer not authorized');
-    // }
-
-    await this.performTransfer(payerId, payeeId, amount);
+    await this.performTransfer(payer.id, payeeId, amount);
   }
 
   private async performTransfer(

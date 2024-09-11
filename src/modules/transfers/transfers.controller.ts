@@ -6,8 +6,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/auth.roles.decorator';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
 import { RolesEnum } from '../roles/enum/role.enum';
+import { User } from '../users/entities/user.entity';
 import { TransfersService } from './transfers.service';
 
 @ApiBearerAuth()
@@ -25,11 +27,11 @@ export class TransfersController {
     description: 'Transfers Wallets Successful',
   })
   async transfer(
-    @Body('payer') payerId: string,
+    @CurrentUser() user: User,
     @Body('payee') payeeId: string,
     @Body('value') amount: number,
   ): Promise<{ message: string }> {
-    await this.transfersService.createNewTransfer(payerId, payeeId, amount);
+    await this.transfersService.createNewTransfer(user, payeeId, amount);
     return { message: 'Transfer successful' };
   }
 }
