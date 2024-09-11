@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
+import * as consts from './../../common/constants/error.constants';
 import { Wallet } from './entities/wallet.entity';
 import { WalletsRepository } from './repository/wallets.repository';
 
@@ -7,37 +8,17 @@ import { WalletsRepository } from './repository/wallets.repository';
 export class WalletsService {
   constructor(private readonly walletsRepository: WalletsRepository) {}
 
-  async credit(
-    userId: string,
-    amount: number,
-    manager?: EntityManager,
-  ): Promise<Wallet> {
-    const wallet = await this.findWalletByUserId(userId, manager);
-    // wallet.credit(amount);
-    return await this.walletsRepository.saveWallet(wallet, manager);
-  }
-
-  async debit(
-    userId: string,
-    amount: number,
-    manager?: EntityManager,
-  ): Promise<Wallet> {
-    const wallet = await this.findWalletByUserId(userId, manager);
-    // wallet.debit(amount);
-    return await this.walletsRepository.saveWallet(wallet, manager);
-  }
-
   async findWalletByUserId(
     userId: string,
     manager?: EntityManager,
   ): Promise<Wallet> {
-    console.log('chegou aqui');
     let wallet = await this.walletsRepository.findByUserId(userId, manager);
+
     if (!wallet) {
-      wallet = Wallet.create(userId);
-      wallet = await this.walletsRepository.saveWallet(wallet, manager);
-      console.log('chegou aqui2');
+      throw new BadRequestException(consts.WALLET_NOT_EXISTS);
     }
+
+    wallet = await this.walletsRepository.saveWallet(wallet, manager);
     return wallet;
   }
 
@@ -49,5 +30,25 @@ export class WalletsService {
     wallet = await this.walletsRepository.saveWallet(wallet, manager);
 
     return wallet;
+  }
+
+  async credit(
+    userId: string,
+    amount: number,
+    manager?: EntityManager,
+  ): Promise<Wallet> {
+    const wallet = await this.findWalletByUserId(userId, manager);
+    wallet.credit(amount);
+    return await this.walletsRepository.saveWallet(wallet, manager);
+  }
+
+  async debit(
+    userId: string,
+    amount: number,
+    manager?: EntityManager,
+  ): Promise<Wallet> {
+    const wallet = await this.findWalletByUserId(userId, manager);
+    wallet.debit(amount);
+    return await this.walletsRepository.saveWallet(wallet, manager);
   }
 }
