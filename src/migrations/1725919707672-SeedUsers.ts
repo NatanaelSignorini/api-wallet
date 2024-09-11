@@ -72,7 +72,9 @@ export class SeedUsers1725919707672 implements MigrationInterface {
           });
           const savedUser = await UserRepo.save(newUser);
 
-          await walletsService.createWalletByUserId(savedUser.id);
+          if (savedUser.role?.name === RolesEnum.USER) {
+            await walletsService.createWalletByUserId(savedUser.id);
+          }
         }
       }),
     );
