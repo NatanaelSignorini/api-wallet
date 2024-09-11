@@ -5,7 +5,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
+import { DataSource } from 'typeorm';
 import { RolesService } from '../roles/roles.service';
+import { WalletsService } from '../wallets/wallets.service';
 import * as consts from './../../common/constants/error.constants';
 import { CreateUserInput } from './dto/create-user.input.dto';
 import { CustomUsersDTO } from './dto/custom-users-dto';
@@ -19,6 +21,8 @@ export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly rolesService: RolesService,
+    private readonly walletsService: WalletsService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async findOneUser(options: any): Promise<User> {
@@ -62,13 +66,41 @@ export class UsersService {
       role,
     });
 
-    const userSaved = await this.usersRepository.saveUser(user);
-    if (!userSaved) {
-      throw new InternalServerErrorException(
-        'Problem to create a User. Try again',
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const user: User = this.usersRepository.create({
+        ...data,
+        role,
+      });
+
+      const userSaved = await queryRunner.manager.save(user);
+      if (!userSaved) {
+        throw new InternalServerErrorException(
+          'Problem to create a User. Try again',
+        );
+      }
+
+      const walletCreate = await this.walletsService.createWalletByUserId(
+        userSaved.id,
       );
+      if (!walletCreate) {
+        throw new InternalServerErrorException(
+          'Problem to create a Wallet. Try again',
+        );
+      }
+
+      await queryRunner.commitTransaction();
+
+      return plainToClass(UserDTO, userSaved);
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-    return plainToClass(UserDTO, userSaved);
   }
 
   async updateUser(id: string, data: UpdateUserInput): Promise<UserDTO> {
