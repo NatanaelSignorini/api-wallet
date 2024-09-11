@@ -9,30 +9,31 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super();
   }
 
-  getRequest(context: ExecutionContext): Request {
-    const httpContext = context.switchToHttp();
-    return httpContext.getRequest();
-  }
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const roles = this.reflector.get<RoleType[]>('roles', context.getHandler());
+    // Primeiro, execute o guard JWT padrão para autenticação
+    const canActivate = await super.canActivate(context);
+    if (!canActivate) {
+      return false;
+    }
 
+    // Obtenha as roles necessárias do contexto
+    const roles = this.reflector.get<RoleType[]>('role', context.getHandler());
+
+    // Se não há roles definidas para o handler, permita o acesso
     if (!roles) {
       return true;
     }
 
-    await super.canActivate(context);
-
+    // Se roles é 'ANY', permita o acesso
     if (roles.includes('ANY')) {
       return true;
     }
 
+    // Obtenha o request e o usuário do contexto
     const httpContext = context.switchToHttp();
     const request = httpContext.getRequest();
-    const userRoles = request.user?.roles.map((userRole) => userRole.name);
+    const user = request.user;
 
-    console.log('userRoles', userRoles);
-
-    return userRoles.some((userRole) => roles.includes(userRole));
+    return roles.includes(user?.role?.name) || false;
   }
 }
