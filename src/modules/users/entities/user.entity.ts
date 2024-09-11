@@ -37,11 +37,9 @@ export class User extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   lastLogin?: Date;
 
-  @ManyToOne(() => Role, (role) => role.users, { nullable: false })
+  @ManyToOne(() => Role, (role) => role.users, { nullable: false, eager: true })
   @JoinTable()
   role: Role;
-  @Column()
-  roleId: string;
 
   @BeforeInsert()
   emailToLowerCase(): void {
