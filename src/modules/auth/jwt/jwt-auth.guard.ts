@@ -31,6 +31,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = httpContext.getRequest();
     const userRoles = request.user?.roles.map((userRole) => userRole.name);
 
+    console.log('userRoles', userRoles);
+
     return userRoles.some((userRole) => roles.includes(userRole));
   }
 }

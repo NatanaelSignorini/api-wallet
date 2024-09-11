@@ -9,7 +9,8 @@ export class UsersRepository extends Repository<User> {
   }
 
   async findOneUser(options: any): Promise<User> {
-    return this.findOne({ ...options });
+    const user = await this.findOne({ ...options });
+    return user;
   }
 
   async findAllUsersWithRole(): Promise<[User[], number]> {

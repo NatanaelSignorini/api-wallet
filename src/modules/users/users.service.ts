@@ -27,9 +27,6 @@ export class UsersService {
 
   async findOneUser(options: any): Promise<User> {
     const userData = await this.usersRepository.findOneUser(options);
-    if (!userData) {
-      throw new NotFoundException(consts.USER_NOT_FOUND);
-    }
     return userData;
   }
 

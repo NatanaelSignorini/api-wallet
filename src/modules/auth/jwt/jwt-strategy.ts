@@ -26,11 +26,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   private async getUser(id: string): Promise<User | null> {
-    console.log('id', id);
-    const user = await this.usersService.findOneUser(id);
-
-    console.log('user', user);
-
+    const user = await this.usersService.findOneUser({
+      where: [{ id: id }],
+    });
     if (!user) {
       return null;
     }
