@@ -35,7 +35,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Get Users All' })
   @ApiResponse({
     status: 200,
-    description: 'The found record',
+    description: 'Get Users All',
     type: CustomUsersDTO,
   })
   async getUsersAll(): Promise<CustomUsersDTO> {
@@ -48,15 +48,13 @@ export class UsersController {
   @ApiOperation({ summary: 'Get User for id' })
   @ApiResponse({
     status: 200,
-    description: 'The found record',
+    description: 'Get User',
     type: UserDTO,
   })
   async getUserById(@Param('id') id: string): Promise<UserDTO> {
     return this.usersService.getUserById(id);
   }
 
-  @Roles('ANY')
-  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: 'Create User' })
   @ApiResponse({
