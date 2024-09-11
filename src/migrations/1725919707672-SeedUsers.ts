@@ -38,7 +38,7 @@ const users = [
     name: 'Amanda Machado',
     email: 'amandomachado@email.com',
     password: '12345678',
-    cpfOrCnpj: '304.451.800-80',
+    cpfOrCnpj: '929.065.420-16',
     role: RolesEnum.USER,
   },
 ];
@@ -67,6 +67,7 @@ export class SeedUsers1725919707672 implements MigrationInterface {
             fullName: user.name,
             email: user.email,
             password: user.password,
+            cpfCnpj: user.cpfOrCnpj,
             role: role,
           });
           const savedUser = await UserRepo.save(newUser);
