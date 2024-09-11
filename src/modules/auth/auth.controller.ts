@@ -30,12 +30,7 @@ export class AuthController {
   }
 
   @Get('isTokenValid/:token')
-  @ApiOperation({ summary: 'Valid Token' })
-  @ApiResponse({
-    status: 200,
-    description: 'Token Valid',
-    type: TokenValidType,
-  })
+  @ApiExcludeEndpoint()
   public async isTokenValid(
     @Param('token') token: string,
   ): Promise<TokenValidType> {

@@ -61,6 +61,7 @@ export class AuthService {
       }
       return { valid: false };
     } catch (error) {
+      console.error('Token validation error:', error);
       return { valid: false };
     }
   }
