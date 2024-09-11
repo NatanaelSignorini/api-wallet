@@ -4,7 +4,7 @@ import { Column, CreateDateColumn, Entity } from 'typeorm';
 @Entity('event_sourcing_events')
 export class EventSourcingEventEntity extends BaseEntity {
   @Column({ name: 'entity_id' })
-  entityId: number;
+  entityId: string;
 
   @Column({ name: 'entity_name' })
   entityName: string;

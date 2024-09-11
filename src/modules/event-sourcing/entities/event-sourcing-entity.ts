@@ -1,4 +1,4 @@
-import { EventSourcingEvent } from '../decorator/event-sourcing-event';
+import { EventSourcingEvent } from '../declare/event-sourcing-event';
 
 export abstract class EventSourcedEntity<
   TEvent extends EventSourcingEvent<any>,

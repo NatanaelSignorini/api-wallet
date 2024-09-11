@@ -21,7 +21,7 @@ export class EventSourcingRepository extends Repository<EventSourcingEventEntity
 
   async findEventsForEntity(
     entityName: string,
-    entityId: number,
+    entityId: string,
     manager?: EntityManager,
   ): Promise<EventSourcingEventEntity[]> {
     const query = manager
