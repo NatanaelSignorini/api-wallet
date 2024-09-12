@@ -18,7 +18,7 @@ import { TransfersService } from './transfers.service';
 export class TransfersController {
   constructor(private transfersService: TransfersService) {}
 
-  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
+  @Roles(RolesEnum.USER)
   @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: 'Transfers Wallets' })
@@ -33,5 +33,37 @@ export class TransfersController {
   ): Promise<{ message: string }> {
     await this.transfersService.createNewTransfer(user, payeeId, amount);
     return { message: 'Transfer successful' };
+  }
+
+  @Roles(RolesEnum.USER)
+  @UseGuards(JwtAuthGuard)
+  @Post('deposit')
+  @ApiOperation({ summary: 'Deposit Wallet' })
+  @ApiResponse({
+    status: 201,
+    description: 'Deposit Wallet Successful',
+  })
+  async deposit(
+    @CurrentUser() user: User,
+    @Body('value') amount: number,
+  ): Promise<{ message: string }> {
+    await this.transfersService.createNewDeposit(user, amount);
+    return { message: 'Deposit successful' };
+  }
+
+  @Roles(RolesEnum.USER)
+  @UseGuards(JwtAuthGuard)
+  @Post('refund')
+  @ApiOperation({ summary: 'Refund Wallet' })
+  @ApiResponse({
+    status: 201,
+    description: 'Refund Wallet Successful',
+  })
+  async refund(
+    @CurrentUser() user: User,
+    @Body('transactionId') transactionId: string,
+  ): Promise<{ message: string }> {
+    await this.transfersService.createNewRefund(user, transactionId);
+    return { message: 'Refund successful' };
   }
 }

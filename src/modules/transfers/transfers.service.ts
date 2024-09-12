@@ -5,6 +5,7 @@ import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { WalletsService } from '../wallets/wallets.service';
 import * as consts from './../../common/constants/error.constants';
+import { Transfer } from './entities/transfer.entity';
 import { TransfersRepository } from './repository/transfers.repository';
 
 @Injectable()
@@ -51,6 +52,40 @@ export class TransfersService {
     await this.performTransfer(payer.id, payeeId, amount);
   }
 
+  async createNewDeposit(user: User, amount: number): Promise<void> {
+    const payer = await this.usersService.findOneUser({
+      where: [{ id: user.id }],
+    });
+
+    if (!payer) {
+      throw new BadRequestException(consts.PAYER_NOT_FOUND);
+    }
+
+    if (payer.role.name === RolesEnum.USER) {
+      const payerWallet = await this.walletsService.findWalletByUserId(
+        payer.id,
+      );
+
+      if (payerWallet) {
+        await this.performDeposit(payer.id, amount);
+      }
+    }
+  }
+
+  async createNewRefund(user: User, transactionId: string): Promise<void> {
+    const payerId = user.id;
+    const transfer = await this.transfersRepository.findByTranferIdAndPayerId(
+      payerId,
+      transactionId,
+    );
+
+    if (!transfer) {
+      throw new BadRequestException(consts.TRANSFER_INVALID);
+    }
+
+    await this.performRefund(transfer);
+  }
+
   private async performTransfer(
     payerId: string,
     payeeId: string,
@@ -61,33 +96,103 @@ export class TransfersService {
     await queryRunner.startTransaction();
 
     try {
-      // Perform the debit and credit operations within the transaction
-      await this.walletsService.debit(payerId, amount, queryRunner.manager);
-      await this.walletsService.credit(payeeId, amount, queryRunner.manager);
-
-      // Create and save the transfer record within the transaction
       const transfer = this.transfersRepository.create({
         payerId,
         payeeId,
         amount,
+        valideReverse: true,
       });
-      await queryRunner.manager.save(transfer);
 
-      // Commit the transaction
+      const transferData = await queryRunner.manager.save(transfer);
+
+      await this.walletsService.debit(
+        payerId,
+        amount,
+        transferData,
+        queryRunner.manager,
+      );
+      await this.walletsService.credit(
+        payeeId,
+        amount,
+        transferData,
+        queryRunner.manager,
+      );
+
       await queryRunner.commitTransaction();
 
-      // // Notify the payee outside of the transaction
-      // await this.notificationsService.notify(
-      //   payeeId,
-      //   `You have received ${amount} from ${payerId}`,
-      // );
-
-      // this.logger.debug(
-      //   `Transfer completed: ${amount} from ${payerId} to ${payeeId}`,
-      // );
+      this.logger.debug(
+        `Transfer completed: TransactionID: ${transferData.id}, Value: ${amount} from ${payerId} to ${payeeId}`,
+      );
     } catch (error) {
       await queryRunner.rollbackTransaction();
       this.logger.error(`Transfer failed: ${error.message}`);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private async performDeposit(payerId: string, amount: number): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const transfer = this.transfersRepository.create({
+        payerId,
+        amount,
+        valideReverse: false,
+      });
+
+      const transferData = await queryRunner.manager.save(transfer);
+
+      await this.walletsService.deposit(
+        payerId,
+        amount,
+        transferData,
+        queryRunner.manager,
+      );
+
+      await queryRunner.commitTransaction();
+
+      this.logger.debug(
+        `Deposit completed: TransactionID: ${transferData.id}, Value: ${amount}`,
+      );
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error(`Deposit failed: ${error.message}`);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private async performRefund(transfer: Transfer): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      transfer.valideReverse = false;
+      await queryRunner.manager.save(transfer);
+
+      const newTransfer = this.transfersRepository.create({
+        payerId: transfer.payeeId,
+        payeeId: transfer.payerId,
+        amount: -Number(transfer.amount),
+        valideReverse: false,
+      });
+
+      const transferData = await queryRunner.manager.save(newTransfer);
+
+      await this.walletsService.refund(transferData, queryRunner.manager);
+
+      await queryRunner.commitTransaction();
+
+      this.logger.debug(`Refund completed: TransactionID: ${transferData.id}`);
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error(`Deposit failed: ${error.message}`);
       throw error;
     } finally {
       await queryRunner.release();
