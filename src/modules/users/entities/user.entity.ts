@@ -59,4 +59,18 @@ export class User extends BaseEntity {
       this.password = await passwordEncoder.hash(this.password);
     }
   }
+
+  // constructor(user?: Partial<User>) {
+  //   super();
+  //   this.id = user.id;
+  //   this.createdAt = user.createdAt;
+  //   this.updatedAt = user.updatedAt;
+  //   this.deletedAt = user.deletedAt;
+  //   this.fullName = user.fullName;
+  //   this.cpfCnpj = user.cpfCnpj;
+  //   this.email = user.email;
+  //   this.password = user.password;
+  //   this.lastLogin = user.lastLogin;
+  //   this.role = user.role;
+  // }
 }

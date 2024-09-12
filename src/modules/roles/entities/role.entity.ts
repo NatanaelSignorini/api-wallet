@@ -15,4 +15,14 @@ export class Role extends BaseEntity {
 
   @OneToMany(() => User, (user) => user.role)
   users: User[];
+
+  // constructor(role?: Partial<Role>) {
+  //   super();
+  //   this.id = role.id;
+  //   this.createdAt = role.createdAt;
+  //   this.updatedAt = role.updatedAt;
+  //   this.deletedAt = role.deletedAt;
+  //   this.name = role?.name;
+  //   this.users = role?.users || [];
+  // }
 }

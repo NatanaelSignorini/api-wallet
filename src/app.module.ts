@@ -7,7 +7,8 @@ import { PostgresConfig } from './config/postgres.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { EventSourcingModule } from './modules/event-sourcing/event-sourcing.module';
 import { RolesModule } from './modules/roles/roles.module';
-import { TransfersModule } from './modules/transfers/transfers.module';
+
+import { TransactionsModule } from './modules/transactions/transactions.module';
 import { UsersModule } from './modules/users/users.module';
 import { WalletsModule } from './modules/wallets/wallets.module';
 
@@ -27,7 +28,7 @@ import { WalletsModule } from './modules/wallets/wallets.module';
     AuthModule,
     RolesModule,
     UsersModule,
-    TransfersModule,
+    TransactionsModule,
     WalletsModule,
     EventSourcingModule,
   ],

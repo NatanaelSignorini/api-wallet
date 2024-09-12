@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
-import { Transfer } from '../transfers/entities/transfer.entity';
+
+import { Transaction } from '../transactions/entities/transaction.entity';
 import * as consts from './../../common/constants/error.constants';
 import { Wallet } from './entities/wallet.entity';
 import { WalletsRepository } from './repository/wallets.repository';
@@ -27,54 +28,56 @@ export class WalletsService {
   ): Promise<Wallet> {
     let wallet = Wallet.create(userId);
     wallet = await this.walletsRepository.saveWallet(wallet, manager);
-
     return wallet;
   }
 
   async credit(
     userId: string,
     amount: number,
-    transfer: Transfer,
+    transaction: Transaction,
     manager?: EntityManager,
   ): Promise<Wallet> {
     const wallet = await this.findWalletByUserId(userId, manager);
-    wallet.credit(amount, transfer);
+    wallet.credit(amount, transaction);
     return await this.walletsRepository.saveWallet(wallet, manager);
   }
 
   async debit(
     userId: string,
     amount: number,
-    transfer: Transfer,
+    transaction: Transaction,
     manager?: EntityManager,
   ): Promise<Wallet> {
     const wallet = await this.findWalletByUserId(userId, manager);
-    wallet.debit(amount, transfer);
+    wallet.debit(amount, transaction);
     return await this.walletsRepository.saveWallet(wallet, manager);
   }
 
   async deposit(
     userId: string,
     amount: number,
-    transfer: Transfer,
+    transaction: Transaction,
     manager?: EntityManager,
   ): Promise<Wallet> {
     const wallet = await this.findWalletByUserId(userId, manager);
-    wallet.deposit(amount, transfer);
+    wallet.deposit(amount, transaction);
     return await this.walletsRepository.saveWallet(wallet, manager);
   }
 
-  async refund(transfer: Transfer, manager?: EntityManager): Promise<void> {
-    const amount = Number(transfer.amount);
-    const payerId = transfer.payerId;
-    const payeeId = transfer.payeeId;
+  async refund(
+    transaction: Transaction,
+    manager?: EntityManager,
+  ): Promise<void> {
+    const amount = Number(transaction.amount);
+    const payerId = transaction.payerId;
+    const payeeId = transaction.payeeId;
 
     const payerWallet = await this.findWalletByUserId(payerId, manager);
-    payerWallet.refund(transfer, amount, true);
+    payerWallet.refund(transaction, amount, true);
     await this.walletsRepository.saveWallet(payerWallet, manager);
 
     const payeeWallet = await this.findWalletByUserId(payeeId, manager);
-    payeeWallet.refund(transfer, amount, false);
+    payeeWallet.refund(transaction, amount, false);
     await this.walletsRepository.saveWallet(payeeWallet, manager);
   }
 }
