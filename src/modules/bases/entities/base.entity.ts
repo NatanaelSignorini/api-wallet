@@ -21,11 +21,4 @@ export class BaseEntity {
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamptz' })
   @Expose({ name: 'deleted_at' })
   deletedAt?: Date;
-
-  // constructor(bases?: Partial<BaseEntity>) {
-  //   this.id = bases.id;
-  //   this.createdAt = bases.createdAt;
-  //   this.updatedAt = bases.updatedAt;
-  //   this.deletedAt = bases.deletedAt;
-  // }
 }

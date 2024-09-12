@@ -10,7 +10,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 
-@Entity()
+@Entity('Users')
 export class User extends BaseEntity {
   @Column({ name: 'full_name', type: 'varchar', length: 60, nullable: true })
   fullName?: string;
@@ -60,17 +60,19 @@ export class User extends BaseEntity {
     }
   }
 
-  // constructor(user?: Partial<User>) {
-  //   super();
-  //   this.id = user.id;
-  //   this.createdAt = user.createdAt;
-  //   this.updatedAt = user.updatedAt;
-  //   this.deletedAt = user.deletedAt;
-  //   this.fullName = user.fullName;
-  //   this.cpfCnpj = user.cpfCnpj;
-  //   this.email = user.email;
-  //   this.password = user.password;
-  //   this.lastLogin = user.lastLogin;
-  //   this.role = user.role;
-  // }
+  constructor(user?: Partial<User>) {
+    super();
+    if (user) {
+      this.id = user.id;
+      this.createdAt = user.createdAt;
+      this.updatedAt = user.updatedAt;
+      this.deletedAt = user.deletedAt;
+      this.fullName = user.fullName;
+      this.cpfCnpj = user.cpfCnpj;
+      this.email = user.email;
+      this.password = user.password;
+      this.lastLogin = user.lastLogin;
+      this.role = user.role;
+    }
+  }
 }

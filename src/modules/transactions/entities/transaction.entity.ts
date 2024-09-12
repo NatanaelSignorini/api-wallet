@@ -18,12 +18,14 @@ export class Transaction extends BaseEntity {
   @Column({ name: 'valide_reverse', type: 'boolean', default: false })
   valideReverse: boolean;
 
-  // constructor(transfer?: Partial<Transfer>) {
-  //   super();
-  //   this.payerId = transfer.payerId;
-  //   this.payeeId = transfer.payeeId;
-  //   this.amount = transfer.amount;
-  //   this.valideReverse = transfer.valideReverse;
-  //   this.date = transfer.date;
-  // }
+  constructor(transaction?: Partial<Transaction>) {
+    super();
+    if (transaction) {
+      this.payerId = transaction.payerId;
+      this.payeeId = transaction.payeeId;
+      this.amount = transaction.amount;
+      this.valideReverse = transaction.valideReverse;
+      this.date = transaction.date;
+    }
+  }
 }
