@@ -8,6 +8,7 @@ import { winstonConfig } from './config/winston.config';
 async function bootstrap() {
   const logger = WinstonModule.createLogger(winstonConfig);
   const app = await NestFactory.create(AppModule, { logger });
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

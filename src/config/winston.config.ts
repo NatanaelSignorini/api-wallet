@@ -11,6 +11,7 @@ export const winstonConfig: WinstonModuleOptions = {
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.timestamp(),
+        winston.format.json(),
         nestWinstonModuleUtilities.format.nestLike(),
       ),
     }),
@@ -18,6 +19,10 @@ export const winstonConfig: WinstonModuleOptions = {
       level: 'verbose',
       filename: 'application.log',
       dirname: 'logs',
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json(),
+      ),
     }),
   ],
 };
