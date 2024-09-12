@@ -58,11 +58,6 @@ export class UsersService {
       throw new NotFoundException(consts.ROLE_NOT_FOUND);
     }
 
-    const user: User = this.usersRepository.create({
-      ...data,
-      role,
-    });
-
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
