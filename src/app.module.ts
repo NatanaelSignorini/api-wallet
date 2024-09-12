@@ -8,6 +8,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import { EventSourcingModule } from './modules/event-sourcing/event-sourcing.module';
 import { RolesModule } from './modules/roles/roles.module';
 
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { WinstonModule } from 'nest-winston';
+import { LoggerInterceptor } from './common/interceptors/logger.interceptor';
+import { winstonConfig } from './config/winston.config';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { UsersModule } from './modules/users/users.module';
 import { WalletsModule } from './modules/wallets/wallets.module';
@@ -25,6 +29,9 @@ import { WalletsModule } from './modules/wallets/wallets.module';
       useClass: PostgresConfig,
     }),
 
+    // Logger configuration
+    WinstonModule.forRoot(winstonConfig),
+
     AuthModule,
     RolesModule,
     UsersModule,
@@ -33,6 +40,12 @@ import { WalletsModule } from './modules/wallets/wallets.module';
     EventSourcingModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggerInterceptor,
+    },
+  ],
 })
 export class AppModule {}
