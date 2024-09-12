@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
-export class TransferDTO {
+export class TransactionDTO {
   @Expose()
   message?: string;
 }

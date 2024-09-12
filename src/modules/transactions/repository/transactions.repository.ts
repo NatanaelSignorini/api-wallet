@@ -1,21 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, IsNull, MoreThan, Not, Repository } from 'typeorm';
-import { Transfer } from '../entities/transfer.entity';
+import { Transaction } from '../entities/transaction.entity';
 
 @Injectable()
-export class TransfersRepository extends Repository<Transfer> {
+export class TransactionsRepository extends Repository<Transaction> {
   constructor(dataSource: DataSource) {
-    super(Transfer, dataSource.manager);
+    super(Transaction, dataSource.manager);
   }
 
-  async findByUserId(userId: string): Promise<Transfer[]> {
+  async findByUserId(userId: string): Promise<Transaction[]> {
     return this.find({ where: [{ payerId: userId }, { payeeId: userId }] });
   }
 
   async findByTranferIdAndPayerId(
     payerId: string,
     transactionId: string,
-  ): Promise<Transfer> {
+  ): Promise<Transaction> {
     return this.findOne({
       where: {
         id: transactionId,

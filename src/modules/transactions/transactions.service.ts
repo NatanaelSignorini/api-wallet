@@ -1,19 +1,20 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+import * as consts from '../../common/constants/error.constants';
 import { RolesEnum } from '../roles/enum/role.enum';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { WalletsService } from '../wallets/wallets.service';
-import * as consts from './../../common/constants/error.constants';
-import { Transfer } from './entities/transfer.entity';
-import { TransfersRepository } from './repository/transfers.repository';
+
+import { Transaction } from './entities/transaction.entity';
+import { TransactionsRepository } from './repository/transactions.repository';
 
 @Injectable()
-export class TransfersService {
-  private readonly logger = new Logger(TransfersService.name);
+export class TransactionsService {
+  private readonly logger = new Logger(TransactionsService.name);
 
   constructor(
-    private readonly transfersRepository: TransfersRepository,
+    private readonly transactionsRepository: TransactionsRepository,
     private readonly usersService: UsersService,
     private readonly walletsService: WalletsService,
     private readonly dataSource: DataSource,
@@ -74,10 +75,11 @@ export class TransfersService {
 
   async createNewRefund(user: User, transactionId: string): Promise<void> {
     const payerId = user.id;
-    const transfer = await this.transfersRepository.findByTranferIdAndPayerId(
-      payerId,
-      transactionId,
-    );
+    const transfer =
+      await this.transactionsRepository.findByTranferIdAndPayerId(
+        payerId,
+        transactionId,
+      );
 
     if (!transfer) {
       throw new BadRequestException(consts.TRANSFER_INVALID);
@@ -96,7 +98,7 @@ export class TransfersService {
     await queryRunner.startTransaction();
 
     try {
-      const transfer = this.transfersRepository.create({
+      const transfer = this.transactionsRepository.create({
         payerId,
         payeeId,
         amount,
@@ -138,7 +140,7 @@ export class TransfersService {
     await queryRunner.startTransaction();
 
     try {
-      const transfer = this.transfersRepository.create({
+      const transfer = this.transactionsRepository.create({
         payerId,
         amount,
         valideReverse: false,
@@ -167,19 +169,19 @@ export class TransfersService {
     }
   }
 
-  private async performRefund(transfer: Transfer): Promise<void> {
+  private async performRefund(transaction: Transaction): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      transfer.valideReverse = false;
-      await queryRunner.manager.save(transfer);
+      transaction.valideReverse = false;
+      await queryRunner.manager.save(transaction);
 
-      const newTransfer = this.transfersRepository.create({
-        payerId: transfer.payeeId,
-        payeeId: transfer.payerId,
-        amount: -Number(transfer.amount),
+      const newTransfer = this.transactionsRepository.create({
+        payerId: transaction.payeeId,
+        payeeId: transaction.payerId,
+        amount: -Number(transaction.amount),
         valideReverse: false,
       });
 

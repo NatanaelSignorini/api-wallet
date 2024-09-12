@@ -10,13 +10,13 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
 import { RolesEnum } from '../roles/enum/role.enum';
 import { User } from '../users/entities/user.entity';
-import { TransfersService } from './transfers.service';
+import { TransactionsService } from './transactions.service';
 
 @ApiBearerAuth()
-@ApiTags('transfers')
-@Controller('transfers')
-export class TransfersController {
-  constructor(private transfersService: TransfersService) {}
+@ApiTags('transactions')
+@Controller('transactions')
+export class TransactionsController {
+  constructor(private transactionsService: TransactionsService) {}
 
   @Roles(RolesEnum.USER)
   @UseGuards(JwtAuthGuard)
@@ -31,7 +31,7 @@ export class TransfersController {
     @Body('payee') payeeId: string,
     @Body('value') amount: number,
   ): Promise<{ message: string }> {
-    await this.transfersService.createNewTransfer(user, payeeId, amount);
+    await this.transactionsService.createNewTransfer(user, payeeId, amount);
     return { message: 'Transfer successful' };
   }
 
@@ -47,7 +47,7 @@ export class TransfersController {
     @CurrentUser() user: User,
     @Body('value') amount: number,
   ): Promise<{ message: string }> {
-    await this.transfersService.createNewDeposit(user, amount);
+    await this.transactionsService.createNewDeposit(user, amount);
     return { message: 'Deposit successful' };
   }
 
@@ -63,7 +63,7 @@ export class TransfersController {
     @CurrentUser() user: User,
     @Body('transactionId') transactionId: string,
   ): Promise<{ message: string }> {
-    await this.transfersService.createNewRefund(user, transactionId);
+    await this.transactionsService.createNewRefund(user, transactionId);
     return { message: 'Refund successful' };
   }
 }
