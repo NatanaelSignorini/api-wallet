@@ -5,7 +5,7 @@ import { RoleDTO } from 'src/modules/roles/dto/role.dto';
 @Exclude()
 export class UserDTO extends BaseDTO {
   @Expose()
-  fullname?: string;
+  fullName?: string;
 
   @Expose()
   cpfCnpj?: string;

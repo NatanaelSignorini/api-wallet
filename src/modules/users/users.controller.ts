@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Post,
   UseGuards,
@@ -51,7 +50,7 @@ export class UsersController {
     description: 'Get User',
     type: UserDTO,
   })
-  async getUserById(@Param('id') id: string): Promise<UserDTO> {
+  async getUserById(@Body('id') id: string): Promise<UserDTO> {
     return this.usersService.getUserById(id);
   }
 
@@ -68,7 +67,7 @@ export class UsersController {
 
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Patch()
   @ApiOperation({ summary: 'Update User' })
   @ApiResponse({
     status: 201,
@@ -76,7 +75,7 @@ export class UsersController {
     type: UserDTO,
   })
   async updateUser(
-    @Param('id') id: string,
+    @Body('id') id: string,
     @Body() data: UpdateUserInput,
   ): Promise<UserDTO> {
     return this.usersService.updateUser(id, data);
@@ -84,14 +83,14 @@ export class UsersController {
 
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
+  @Delete()
   @ApiOperation({ summary: 'Delete User' })
   @ApiResponse({
     status: 201,
     description: 'Delete User',
     type: 'boolean',
   })
-  async deleteUser(@Param('id') id: string): Promise<boolean> {
+  async deleteUser(@Body('id') id: string): Promise<boolean> {
     const deleted = await this.usersService.deleteUser(id);
     return deleted;
   }

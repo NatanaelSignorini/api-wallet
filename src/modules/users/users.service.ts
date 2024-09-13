@@ -96,17 +96,23 @@ export class UsersService {
   }
 
   async updateUser(id: string, data: UpdateUserInput): Promise<UserDTO> {
-    const foundUser: User = await this.usersRepository.findUserById(id);
+    const foundUser = await this.usersRepository.findUserById(id);
     if (!foundUser) {
       throw new NotFoundException(consts.USER_NOT_FOUND);
     }
 
-    const role = await this.rolesService.findByName(data.role);
-    if (!role) {
-      throw new NotFoundException(consts.ROLE_NOT_FOUND);
+    let role = foundUser.role;
+
+    // Verifica se o role foi passado e busca o novo role se necessário
+    if (data.role && data.role !== foundUser.role.name) {
+      role = await this.rolesService.findByName(data.role);
+      if (!role) {
+        throw new NotFoundException(consts.ROLE_NOT_FOUND);
+      }
     }
 
-    const updatedUser: User = this.usersRepository.create({
+    // Atualiza os dados do usuário
+    const updatedUser = this.usersRepository.create({
       ...foundUser,
       ...data,
       role,
@@ -115,7 +121,7 @@ export class UsersService {
     const userSaved = await this.usersRepository.saveUser(updatedUser);
     if (!userSaved) {
       throw new InternalServerErrorException(
-        'Problem to update a User. Try again',
+        'Problem to update the User. Try again',
       );
     }
 
